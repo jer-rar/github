@@ -1,0 +1,6 @@
+[testgroup]
+testhost ansible_host=192.168.254.125
+[testgroup:vars]
+ansible_user=jerrar
+ansible_ssh-pass=Linuxlab
+ansible_become_pass=Linuxlab

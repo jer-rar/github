@@ -1,0 +1,9 @@
+---
+- name: Clone a Git repository
+  hosts: testhost
+  tasks:
+    - name: Clone the repository
+      ansible.builtin.git:
+        repo: "git@github.com:jer-rar/Linuxlab.git"
+        dest: /home/jerrar/my_project
+        key_file: /home/jerrar/.ssh/id_ed25519
