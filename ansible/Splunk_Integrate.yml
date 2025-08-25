@@ -1,0 +1,15 @@
+---
+- name: Splunk Event-Driven Ansible
+  hosts: all
+  sources:
+    - ansible.eda.splunk:
+        host: <splunk-host>
+        port: 8088
+        token: <splunk-hec-token>
+        index: <splunk-index>
+  rules:
+    - name: Handle Splunk Event
+      condition: event.type == "error"
+      action:
+        run_playbook:
+          name: fix_error.yml

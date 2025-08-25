@@ -1,0 +1,43 @@
+---
+- name: Install and Configure Splunk Universal Forwarder
+  hosts: all
+  become: true
+  vars:
+    splunk_rpm: "splunkforwarder-<version>-Linux-x86_64.rpm"  # Replace with your RPM filename
+    splunk_forwarder_path: "/opt/splunkforwarder"
+    splunk_indexer_ip: "<your-splunk-indexer-ip-or-url>"  # Replace with your Splunk indexer (e.g., Splunk Cloud URL or EC2 IP)
+    splunk_deployment_server: "<your-deployment-server>"  # Optional for managed configs
+
+  tasks:
+    - name: Copy Splunk RPM to Managed Node
+      copy:
+        src: "~/{{ splunk_rpm }}"
+        dest: "/tmp/{{ splunk_rpm }}"
+
+    - name: Install Splunk Forwarder RPM
+      dnf:
+        name: "/tmp/{{ splunk_rpm }}"
+        state: present
+
+    - name: Accept License and Start Forwarder
+      command: "{{ splunk_forwarder_path }}/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd changeme"  # Change default password
+
+    - name: Configure Outputs to Indexer
+      template:
+        src: outputs.conf.j2
+        dest: "{{ splunk_forwarder_path }}/etc/system/local/outputs.conf"
+        mode: 0644
+      notify: Restart Forwarder
+
+    - name: Enable Boot Start
+      command: "{{ splunk_forwarder_path }}/bin/splunk enable boot-start -user ec2-user"
+
+  handlers:
+    - name: Restart Forwarder
+      command: "{{ splunk_forwarder_path }}/bin/splunk restart"
+
+# Add a template file outputs.conf.j2 in the same directory:
+# [tcpout]
+# defaultGroup = my_indexers
+# [tcpout:my_indexers]
+# server = {{ splunk_indexer_ip }}:9997

@@ -1,0 +1,52 @@
+---
+- name: Check and Apply Latest OS Patches
+  hosts: all
+  become: true
+  vars:
+    email_recipient: jdr6382@gmail.com
+    email_sender: jerrar6382@gmail.com
+    smtp_server: smtp.gmail.com
+    smtp_port: 587
+    smtp_user: Jerrar6382@gmail.com
+    smtp_pass: Jn@n$ng2025
+    smtp_use_tls: true
+
+  tasks:
+    - name: Update DNF cache
+      dnf:
+        update_cache: yes
+      register: cache_update
+
+    - name: Check for available updates
+      dnf:
+        list: updates
+      register: updates_available
+
+    - name: Set patch status fact
+      set_fact:
+        patch_status: "{{ 'No patches available; system is up to date.' if updates_available.results | length == 0 else 'Available updates: ' + (updates_available.results | map(attribute='name') | join(', ')) }}"
+
+    - name: Apply latest OS patches if available
+      dnf:
+        name: '*'
+        state: latest
+      when: updates_available.results | length > 0
+      register: patch_applied
+
+    - name: Reboot if patches were applied
+      reboot:
+        msg: "Rebooting after applying OS patches"
+      when: patch_applied.changed
+
+    - name: Send email with patch status
+      community.general.mail:
+        host: "{{ smtp_server }}"
+        port: "{{ smtp_port }}"
+        username: "{{ smtp_user }}"
+        password: "{{ smtp_pass }}"
+        secure: starttls if smtp_use_tls else none
+        subject: "OS Patch Check Results for {{ inventory_hostname }}"
+        body: "{{ patch_status }}\nPatches applied and rebooted: {{ 'Yes' if patch_applied.changed else 'No' }}"
+        from: "{{ email_sender }}"
+        to: "{{ email_recipient }}"
+      delegate_to: localhost  # Run email task on control node

@@ -1,0 +1,30 @@
+---
+- name: Deploy Splunk Enterprise on AWS EC2
+  hosts: splunk_server  
+  become: true
+  vars:
+    splunk_rpm: "splunk-<version>-Linux-x86_64.rpm"
+    splunk_path: "/opt/splunk"
+
+  tasks:
+    - name: Copy Splunk RPM
+      copy:
+        src: "~/{{ splunk_rpm }}"
+        dest: "/tmp/{{ splunk_rpm }}"
+
+    - name: Install Splunk Enterprise
+      dnf:
+        name: "/tmp/{{ splunk_rpm }}"
+        state: present
+
+    - name: Accept License and Start Splunk
+      command: "{{ splunk_path }}/bin/splunk start --accept-license --answer-yes --no-prompt --seed-passwd changeme"  # Change default password
+
+    - name: Enable Boot Start
+      command: "{{ splunk_path }}/bin/splunk enable boot-start -user ec2-user"
+
+    - name: Configure Admin Port (Optional)
+      command: "{{ splunk_path }}/bin/splunk set web-port 8000 -auth admin:changeme"
+
+    - name: Restart Splunk
+      command: "{{ splunk_path }}/bin/splunk restart"
