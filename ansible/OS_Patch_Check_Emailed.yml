@@ -1,0 +1,40 @@
+---
+- name: Check for Latest OS Patches and Email Results
+  hosts: all
+  become: true
+  vars:
+    email_recipient: jdr6382@gmail.com
+    email_sender: jerrar6382@gmail.com
+    smtp_server: smtp.gmail.com
+    smtp_port: 587
+    smtp_user: Jerrar6382@gmail.com
+    smtp_pass: Jn@n$ng2025
+    smtp_use_tls: true
+
+  tasks:
+    - name: Update DNF cache
+      dnf:
+        update_cache: yes
+      register: cache_update
+
+    - name: Check for available updates
+      dnf:
+        list: updates
+      register: updates_available
+
+    - name: Set update status fact
+      set_fact:
+        update_status: "{{ 'The managed node is up to date. No patches available.' if updates_available.results | length == 0 else 'Available updates: ' + (updates_available.results | map(attribute='name') | join(', ')) }}"
+
+    - name: Send email with update status
+      community.general.mail:
+        host: "{{ smtp_server }}"
+        port: "{{ smtp_port }}"
+        username: "{{ smtp_user }}"
+        password: "{{ smtp_pass }}"
+        secure: starttls if smtp_use_tls else none
+        subject: "OS Patch Check Results for {{ inventory_hostname }}"
+        body: "{{ update_status }}"
+        from: "{{ email_sender }}"
+        to: "{{ email_recipient }}"
+      delegate_to: localhost
