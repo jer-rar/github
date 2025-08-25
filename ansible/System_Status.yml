@@ -1,6 +1,6 @@
 ---
-- name: Show System Status on Managed Node
-  hosts: testhost2
+- name: Show System Status
+  hosts: all
   become: true
   tasks:
     - name: Gather system facts
@@ -12,7 +12,7 @@
 
     - name: Display Uptime
       debug:
-        msg: "Uptime: {{ ansible_uptime_seconds | int | community.general.pretty_seconds }}"
+        msg: "Uptime: {{ ansible_uptime_seconds }} seconds"
 
     - name: Display Memory Usage
       debug:
