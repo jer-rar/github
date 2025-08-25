@@ -1,0 +1,24 @@
+---
+- name: Check for Latest OS Patches on Managed Node
+  hosts: all
+  become: true
+  tasks:
+    - name: Update DNF cache
+      dnf:
+        update_cache: yes
+      register: cache_update
+
+    - name: Check for available updates
+      dnf:
+        list: updates
+      register: updates_available
+
+    - name: Display if the node is up to date
+      debug:
+        msg: "The managed node is up to date. No patches available."
+      when: updates_available.results | length == 0
+
+    - name: Display available updates
+      debug:
+        msg: "Available updates: {{ updates_available.results | map(attribute='name') | list }}"
+      when: updates_available.results | length > 0

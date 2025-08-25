@@ -1,9 +1,20 @@
 ---
 - name: Clone a Git repository
   hosts: testhost
+  become: yes
+  vars:
+    repo_url: 'git@github.com:jer-rar/github.git'
+    dest_dir: /home/jerrar/my_project
+
   tasks:
+    - name: Ensure git is installed
+      ansible.builtin.package:
+        name: git
+        state: present
+
     - name: Clone the repository
       ansible.builtin.git:
-        repo: "git@github.com:jer-rar/Linuxlab.git"
-        dest: /home/jerrar/my_project
-        key_file: /home/jerrar/.ssh/id_ed25519
+        repo: '{{ repo_url }}'
+        dest: '{{ dest_dir }}'
+        key_file: /home/jerrar/.ssh/github_id_rsa
+        accept_hostkey: yes

@@ -1,5 +1,14 @@
 [testgroup]
-testhost ansible_host=192.168.254.125
+testhost ansible_host=172.31.47.54
+
+[testgroup2]
+testhost2 ansible_host=172.31.44.245
+
+[testgroup2:vars]
+ansible_user=jerrar
+ansible_ssh-pass=Linuxlab
+ansible_become_pass=Linuxlab
+
 [testgroup:vars]
 ansible_user=jerrar
 ansible_ssh-pass=Linuxlab
