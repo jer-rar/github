@@ -1,6 +1,6 @@
 ---
 - name: Show System Status on Managed Node
-  hosts: managed
+  hosts: testhost2
   become: true
   tasks:
     - name: Gather system facts
