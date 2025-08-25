@@ -1,0 +1,35 @@
+---
+- name: Show System Status on Managed Node
+  hosts: managed
+  become: true
+  tasks:
+    - name: Gather system facts
+      setup:
+        gather_subset:
+          - hardware
+          - network
+          - virtual
+
+    - name: Display Uptime
+      debug:
+        msg: "Uptime: {{ ansible_uptime_seconds | int | community.general.pretty_seconds }}"
+
+    - name: Display Memory Usage
+      debug:
+        msg: "Total Memory: {{ ansible_memtotal_mb }} MB | Free Memory: {{ ansible_memfree_mb }} MB | Used Memory: {{ ansible_memtotal_mb - ansible_memfree_mb }} MB"
+
+    - name: Display Disk Usage
+      debug:
+        msg: "Disk Usage for /: Total {{ ansible_mounts[0].size_total | filesizeformat }}, Available {{ ansible_mounts[0].size_available | filesizeformat }}"
+
+    - name: Display CPU Info
+      debug:
+        msg: "CPU Model: {{ ansible_processor[1] }} | Cores: {{ ansible_processor_cores }}"
+
+    - name: Display Network Info
+      debug:
+        msg: "Private IP: {{ ansible_default_ipv4.address }} | Public IP: {{ ansible_ec2_public_ipv4 | default('N/A') }}"
+
+    - name: Display OS Version
+      debug:
+        msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }} | Kernel: {{ ansible_kernel }}"
