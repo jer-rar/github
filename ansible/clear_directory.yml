@@ -1,0 +1,17 @@
+---
+- name: Delete All Files /Temp
+  hosts: testhost2
+  become: true
+  tasks:
+    - name: Find all files in /home/ec2-user/temp
+      find:
+        paths: /home/ec2-user/temp
+        patterns: '*'
+        file_type: file
+      register: files_to_delete
+
+    - name: Delete the found files
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ files_to_delete.files }}"
