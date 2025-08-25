@@ -32,7 +32,7 @@
         port: "{{ smtp_port }}"
         username: "{{ smtp_user }}"
         password: "{{ smtp_pass }}"
-        secure: starttls if smtp_use_tls else none
+        secure: "{{ 'starttls' if smtp_use_tls else 'never' }}"
         subject: "OS Patch Check Results for {{ inventory_hostname }}"
         body: "{{ update_status }}"
         from: "{{ email_sender }}"
