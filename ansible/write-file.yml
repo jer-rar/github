@@ -1,6 +1,6 @@
 ---
 - name: write a simple file
-  hosts: localhost
+  hosts: 
   gather_facts: false
   tasks:
     - name: Write file test.txt to temp directory
